@@ -1,0 +1,25 @@
+hosts:
+  - ip: 10.0.252.1
+    type: juniper
+  - ip: 10.0.252.2
+    type: linux
+  - ip: 10.0.252.3
+    type: guerilla
+
+# matchtype: regex(i), match(i), default
+# matchpattern: string specific to pattern
+# action, discard (ignore this message), retain (store for long term), alert(send alert), trigger (trigger webhook)
+rules:
+    - type: juniper
+      matchtype: regexi
+      matchpattern: license
+      action: skip
+    - type: juniper
+      matchtype: match
+      matchpattern: login
+      action: retain
+    - type: juniper
+      matchtype: regex    
+      matchpattern: port down
+      action: alert
+    
