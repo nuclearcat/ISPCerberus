@@ -49,31 +49,22 @@ type RULE struct {
 	Pattern		string
 }
 
-type PROCESSOR struct {
-	RulesSlice[] RULE
+type HOST struct {
+	IP		net.Addr
+	Namespace	string
 }
 
+/*
+type PROCESSOR struct {
+	RulesSlice[] RULE
+	HostsSlice[] HOST
+}
+*/
+
 var PRules map[string][]RULE
+var PHosts []HOST
 
-func read_cfg() {
-	var CFG YAMLT
-	PRules = make(map[string][]RULE, 0)
-	
-	cfgdata, err := ioutil.ReadFile("syslog-processor.yaml") // just pass the file name
-	if err != nil {
-		fmt.Print(err)
-	}
-	
-	CFG = YAMLT{}
-        err = yaml.Unmarshal([]byte(cfgdata), &CFG)
-        if err != nil {
-                log.Fatalf("error: %v", err)
-        }
-        fmt.Printf("--- t:\n%v\n\n", CFG)
-	log.Println(CFG)
-
-	
-
+func process_cfg_rules(CFG YAMLT) {
 	for _, rule := range CFG.Rules {
 		var rulekey string
 		// Rule namespace (map key), is device type
@@ -106,6 +97,43 @@ func read_cfg() {
 		PRules[rulekey] = append(PRules[rulekey], newrule)
 		log.Println(rule)
 	}
+}
+
+func process_cfg_hosts(CFG YAMLT) {
+	for _, host := range CFG.Hosts {
+		newelement := HOST{}
+		newelement.Namespace = host.Type
+		ip , err := net.ResolveIPAddr("ip",host.IP)
+		if (err == nil) {
+			newelement.IP = ip
+			PHosts = append(PHosts, newelement)
+		}
+		
+	}
+	log.Println(PHosts)
+}
+
+func read_cfg() {
+	var CFG YAMLT
+	PRules = make(map[string][]RULE, 0)
+	//PHosts = make([]RULE, 0)
+	
+	cfgdata, err := ioutil.ReadFile("syslog-processor.yaml") // just pass the file name
+	if err != nil {
+		fmt.Print(err)
+	}
+	
+	CFG = YAMLT{}
+        err = yaml.Unmarshal([]byte(cfgdata), &CFG)
+        if err != nil {
+                log.Fatalf("error: %v", err)
+        }
+        //fmt.Printf("--- t:\n%v\n\n", CFG)
+	//log.Println(CFG)
+	process_cfg_rules(CFG)
+	process_cfg_hosts(CFG)
+	
+
 	fmt.Printf("LOL:%v\n", PRules)
 }
 
