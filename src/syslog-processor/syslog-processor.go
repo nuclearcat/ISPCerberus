@@ -36,7 +36,8 @@ const (
 )
 
 const (
-	ActionType_Discard int 	= 0
+	ActionType_Default int 	= 0
+	ActionType_Discard     	= 1
 	ActionType_Webhook     	= 1
 	ActionType_Alert     	= 2
 	ActionType_Retain     	= 3
@@ -74,12 +75,10 @@ func read_cfg() {
 	
 
 	for _, rule := range CFG.Rules {
-		//var ptype int
-		//var atype int
 		var rulekey string
-		// Identify rule namespace (key), device type
+		// Rule namespace (map key), is device type
 		rulekey = rule.Type
-		newrule := RULE{} 
+		newrule := RULE{}
 		switch {
 			case rule.MatchType == "regex":
 				newrule.ParserType = ParserType_Regex
@@ -92,9 +91,18 @@ func read_cfg() {
 			default:
 				newrule.ParserType = ParserType_Default
 		}
-		//if (PRules[rulekey] == nil) {
-		//	PRules[rulekey] := []RULE{}
-		//}
+		switch {
+			case rule.Action == "discard":
+				newrule.ActionType = ActionType_Discard
+			case rule.Action == "trigger":
+				newrule.ActionType = ActionType_Webhook
+			case rule.Action == "alert":
+				newrule.ActionType = ActionType_Webhook
+			default:
+				newrule.ActionType = ActionType_Default
+		}
+		newrule.Pattern = rule.MatchPattern
+
 		PRules[rulekey] = append(PRules[rulekey], newrule)
 		log.Println(rule)
 	}

@@ -8,12 +8,12 @@ hosts:
 
 # matchtype: regex(i), match(i), default
 # matchpattern: string specific to pattern
-# action, discard (ignore this message), retain (store for long term), alert(send alert), trigger (trigger webhook)
+# action: discard (ignore this message), retain (store for long term), alert(send alert), trigger (trigger webhook)
 rules:
     - type: juniper
       matchtype: regexi
       matchpattern: license
-      action: skip
+      action: discard
     - type: juniper
       matchtype: match
       matchpattern: login
